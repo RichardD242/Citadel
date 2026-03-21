@@ -1,12 +1,18 @@
-import { FormEvent, useState } from "react";
+import { FormEvent, useEffect, useMemo, useState } from "react";
 import { Component as EtheralShadow } from "@/components/ui/etheral-shadow";
 
-function App() {
+type SignupRow = {
+  timestamp: string;
+  email: string;
+};
+
+function LandingPage() {
   const [email, setEmail] = useState("");
   const [note, setNote] = useState("");
   const [noteClass, setNoteClass] = useState("text-white/80");
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const onSubmit = (event: FormEvent<HTMLFormElement>) => {
+  const onSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const normalized = email.trim();
     if (!normalized || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalized)) {
@@ -15,9 +21,29 @@ function App() {
       return;
     }
 
-    setNote("You are on the Citadel waitlist.");
-    setNoteClass("text-emerald-300");
-    setEmail("");
+    try {
+      setIsSubmitting(true);
+      const response = await fetch("/api/waitlist", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ email: normalized }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Could not save your signup.");
+      }
+
+      setNote("You are on the Citadel waitlist.");
+      setNoteClass("text-emerald-300");
+      setEmail("");
+    } catch {
+      setNote("Could not save your signup right now. Please try again.");
+      setNoteClass("text-rose-300");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -69,6 +95,7 @@ function App() {
             <button
               type="submit"
               aria-label="Join waitlist"
+              disabled={isSubmitting}
               className="inline-flex h-[58px] w-[58px] items-center justify-center rounded-full border border-white/35 bg-[rgba(49,49,53,0.82)] p-0 text-white shadow-[0_10px_18px_rgba(0,0,0,0.30)] transition hover:-translate-y-px hover:bg-[rgba(61,61,67,0.92)] hover:shadow-[0_12px_22px_rgba(0,0,0,0.36)] max-[460px]:w-full"
             >
               <svg
@@ -103,7 +130,9 @@ function App() {
         <footer className="flex items-end justify-center gap-3 pb-1">
           <a
             className="inline-flex h-[22px] w-[22px] items-center justify-center text-white/90 transition hover:-translate-y-px hover:text-white"
-            href="#"
+            href="https://www.instagram.com/realcitadel.store/"
+            target="_blank"
+            rel="noreferrer"
             aria-label="Instagram"
           >
             <svg className="h-[19px] w-[19px]" viewBox="0 0 24 24" fill="none" aria-hidden="true">
@@ -112,25 +141,200 @@ function App() {
               <circle cx="17.3" cy="6.7" r="1" fill="currentColor" />
             </svg>
           </a>
-          <a
-            className="inline-flex h-[22px] w-[22px] items-center justify-center text-white/90 transition hover:-translate-y-px hover:text-white"
-            href="#"
-            aria-label="X"
-          >
-            <svg className="h-[19px] w-[19px]" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-              <path
-                d="M4 4h4.2l4.2 5.7L17.1 4H20l-6.2 7.3L20.5 20h-4.2l-4.8-6.4L6.5 20H3.6l6.4-7.5L4 4z"
-                stroke="currentColor"
-                strokeWidth="1.9"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
-          </a>
         </footer>
       </div>
     </div>
   );
+}
+
+function AdminPage() {
+  const [password, setPassword] = useState("");
+  const [token, setToken] = useState(() => sessionStorage.getItem("citadel_admin_token") || "");
+  const [error, setError] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [signups, setSignups] = useState<SignupRow[]>([]);
+
+  const isLoggedIn = !!token;
+
+  const fetchSignups = async (activeToken: string) => {
+    setIsLoading(true);
+    setError("");
+    try {
+      const response = await fetch("/api/admin/signups", {
+        headers: {
+          Authorization: `Bearer ${activeToken}`,
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error("Unauthorized");
+      }
+
+      const data = (await response.json()) as { signups: SignupRow[] };
+      setSignups(data.signups || []);
+    } catch {
+      setError("Could not load signups. Check your password and try again.");
+      setToken("");
+      sessionStorage.removeItem("citadel_admin_token");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (token) {
+      fetchSignups(token);
+    }
+  }, [token]);
+
+  const onLogin = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    if (!password.trim()) {
+      setError("Enter admin password.");
+      return;
+    }
+
+    setIsLoading(true);
+    setError("");
+    try {
+      const response = await fetch("/api/admin/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ password }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Invalid password");
+      }
+
+      const data = (await response.json()) as { token: string };
+      sessionStorage.setItem("citadel_admin_token", data.token);
+      setToken(data.token);
+      setPassword("");
+    } catch {
+      setError("Invalid password.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const logout = () => {
+    sessionStorage.removeItem("citadel_admin_token");
+    setToken("");
+    setSignups([]);
+    setPassword("");
+    setError("");
+  };
+
+  return (
+    <div className="min-h-screen bg-black px-4 py-8 text-white sm:px-8">
+      <div className="mx-auto w-full max-w-3xl rounded-3xl border border-white/20 bg-white/5 p-6 backdrop-blur-sm sm:p-8">
+        <div className="mb-6 flex items-center justify-between gap-4">
+          <h1 className="text-3xl font-bold">Citadel Admin</h1>
+          <a className="text-sm text-white/70 underline hover:text-white" href="/">
+            Back to site
+          </a>
+        </div>
+
+        {!isLoggedIn ? (
+          <form className="space-y-4" onSubmit={onLogin}>
+            <label className="block text-sm text-white/80" htmlFor="admin-password">
+              Password
+            </label>
+            <input
+              id="admin-password"
+              type="password"
+              value={password}
+              onChange={(event) => setPassword(event.target.value)}
+              className="h-12 w-full rounded-xl border border-white/30 bg-white/10 px-4 text-white outline-none focus:border-white/70"
+              placeholder="Enter admin password"
+              required
+            />
+            <button
+              type="submit"
+              disabled={isLoading}
+              className="h-12 rounded-xl border border-white/30 bg-white/10 px-5 font-semibold transition hover:bg-white/20 disabled:opacity-60"
+            >
+              {isLoading ? "Checking..." : "Login"}
+            </button>
+            {error ? <p className="text-rose-300">{error}</p> : null}
+          </form>
+        ) : (
+          <div className="space-y-4">
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <p className="text-sm text-white/80">Total signups: {signups.length}</p>
+              <div className="flex gap-2">
+                <button
+                  type="button"
+                  onClick={() => fetchSignups(token)}
+                  className="h-10 rounded-lg border border-white/30 bg-white/10 px-4 text-sm font-medium transition hover:bg-white/20"
+                >
+                  Refresh
+                </button>
+                <button
+                  type="button"
+                  onClick={logout}
+                  className="h-10 rounded-lg border border-white/30 bg-white/10 px-4 text-sm font-medium transition hover:bg-white/20"
+                >
+                  Logout
+                </button>
+              </div>
+            </div>
+
+            {error ? <p className="text-rose-300">{error}</p> : null}
+
+            <div className="overflow-hidden rounded-xl border border-white/20">
+              <table className="w-full border-collapse text-left text-sm">
+                <thead className="bg-white/10">
+                  <tr>
+                    <th className="px-4 py-3 font-semibold">Email</th>
+                    <th className="px-4 py-3 font-semibold">Timestamp</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {signups.map((row, index) => (
+                    <tr key={`${row.email}-${row.timestamp}-${index}`} className="border-t border-white/10">
+                      <td className="px-4 py-3">{row.email}</td>
+                      <td className="px-4 py-3 text-white/75">{row.timestamp}</td>
+                    </tr>
+                  ))}
+                  {signups.length === 0 && !isLoading ? (
+                    <tr>
+                      <td className="px-4 py-4 text-white/70" colSpan={2}>
+                        No signups yet.
+                      </td>
+                    </tr>
+                  ) : null}
+                  {isLoading ? (
+                    <tr>
+                      <td className="px-4 py-4 text-white/70" colSpan={2}>
+                        Loading...
+                      </td>
+                    </tr>
+                  ) : null}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function App() {
+  const [path, setPath] = useState(() => window.location.pathname);
+
+  useEffect(() => {
+    const onPopState = () => setPath(window.location.pathname);
+    window.addEventListener("popstate", onPopState);
+    return () => window.removeEventListener("popstate", onPopState);
+  }, []);
+
+  const isAdmin = useMemo(() => path.startsWith("/admin"), [path]);
+  return isAdmin ? <AdminPage /> : <LandingPage />;
 }
 
 export default App;

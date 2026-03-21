@@ -27,6 +27,7 @@ The site presents:
 - Vite
 - Tailwind CSS
 - Framer Motion
+- Supabase
 
 ## Getting Started
 
@@ -34,13 +35,34 @@ The site presents:
 
    npm install
 
-2. Start development server:
+2. Start waitlist API server:
+
+  npm run dev:server
+
+3. Start frontend dev server:
 
    npm run dev
 
-3. Build for production:
+4. Build for production:
 
    npm run build
+
+## Environment Variables
+
+Create a `.env` file in project root:
+
+- `ADMIN_PASSWORD`: password for `/admin`
+- `SUPABASE_URL`: your Supabase project URL
+- `SUPABASE_SECRET_KEY`: your Supabase secret/service role key (server-side only)
+- `SUPABASE_WAITLIST_TABLE`: table name, defaults to `waitlist_signups`
+
+## Admin Access
+
+- Admin page: /admin
+- Password is controlled by ADMIN_PASSWORD in your .env file
+- Copy .env.example to .env and set a strong password before using in production
+
+The admin page lists all waitlist signups saved by the API.
 
 ## Status
 
