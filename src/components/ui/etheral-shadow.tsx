@@ -120,7 +120,7 @@ export function Component({
         {animationEnabled && (
           <svg style={{ position: 'absolute' }}>
             <defs>
-              <filter id={id} x='-30%' y='-30%' width='160%' height='160%'>
+              <filter id={id}>
                 <feTurbulence
                   result='undulation'
                   numOctaves='2'
@@ -135,7 +135,7 @@ export function Component({
                   values='180'
                 />
                 <feColorMatrix
-                  in='undulation'
+                  in='dist'
                   result='circulation'
                   type='matrix'
                   values='4 0 0 0 1  4 0 0 0 1  4 0 0 0 1  1 0 0 0 0'
