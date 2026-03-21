@@ -52,9 +52,25 @@ The site presents:
 Create a `.env` file in project root:
 
 - `ADMIN_PASSWORD`: password for `/admin`
+- `ADMIN_TOKEN_SECRET`: long random secret for signing admin tokens
 - `SUPABASE_URL`: your Supabase project URL
 - `SUPABASE_SECRET_KEY`: your Supabase secret/service role key (server-side only)
 - `SUPABASE_WAITLIST_TABLE`: table name, defaults to `waitlist_signups`
+
+## Deploy On Vercel
+
+1. Import your GitHub repo in Vercel.
+2. Framework preset: Vite.
+3. Build command: `npm run build`.
+4. Output directory: `dist`.
+5. Add environment variables in Vercel Project Settings:
+  - `ADMIN_PASSWORD`
+  - `ADMIN_TOKEN_SECRET`
+  - `SUPABASE_URL`
+  - `SUPABASE_SECRET_KEY`
+  - `SUPABASE_WAITLIST_TABLE`
+
+The project includes serverless functions in `/api` for waitlist and admin endpoints, so `/admin` and signup work in production on Vercel.
 
 ## Admin Access
 
