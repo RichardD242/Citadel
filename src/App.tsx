@@ -59,17 +59,17 @@ function LandingPage() {
 
       <div className="pointer-events-none absolute inset-0 bg-black/45" />
 
-      <div className="relative z-10 grid min-h-screen grid-rows-[auto_1fr_auto] px-4 py-7 sm:px-7">
+      <div className="relative z-10 grid min-h-screen grid-rows-[auto_1fr_auto] px-4 pb-5 pt-6 sm:px-7 sm:py-7">
         <header className="flex justify-center">
           <img
-            className="h-auto w-[214px] max-w-[64vw] sm:max-w-[35vw]"
+            className="h-auto w-[220px] max-w-[72vw] sm:max-w-[35vw]"
             src="/logos/citadel-white-hzlgo-removebg-preview.png"
             alt="Citadel"
           />
         </header>
 
-        <main className="mx-auto flex w-full max-w-[760px] -translate-y-[2vh] flex-col justify-center">
-          <h1 className="text-center text-[clamp(2.1rem,5.1vw,3.65rem)] font-extrabold leading-[1.03] tracking-[-0.02em]">
+        <main className="mx-auto flex w-full max-w-[760px] flex-col justify-center pt-8 sm:-translate-y-[2vh] sm:pt-0">
+          <h1 className="text-center text-[clamp(1.85rem,9.5vw,3.65rem)] font-extrabold leading-[1.04] tracking-[-0.02em]">
             Join the Waitlist!
           </h1>
           <p className="mt-3 text-center text-[clamp(0.9rem,1.25vw,1.08rem)] font-medium text-white/90">
@@ -77,7 +77,7 @@ function LandingPage() {
           </p>
 
           <form
-            className="mx-auto mt-7 grid w-full max-w-[560px] grid-cols-[1fr_auto] items-center gap-2 max-[460px]:grid-cols-1"
+            className="mx-auto mt-7 grid w-full max-w-[560px] grid-cols-1 items-center gap-3 sm:grid-cols-[1fr_auto] sm:gap-2"
             onSubmit={onSubmit}
           >
             <input
@@ -89,14 +89,14 @@ function LandingPage() {
               autoComplete="email"
               value={email}
               onChange={(event) => setEmail(event.target.value)}
-              className="h-[58px] w-full rounded-full border border-white/35 bg-[rgba(49,49,53,0.82)] px-6 text-base text-white outline-none transition focus:border-white/85 focus:bg-[rgba(60,60,65,0.9)] focus:shadow-[0_0_0_3px_rgba(255,255,255,0.55)]"
+              className="h-[56px] w-full rounded-full border border-white/35 bg-[rgba(49,49,53,0.82)] px-6 text-base text-white outline-none transition focus:border-white/85 focus:bg-[rgba(60,60,65,0.9)] focus:shadow-[0_0_0_3px_rgba(255,255,255,0.55)] sm:h-[58px]"
               required
             />
             <button
               type="submit"
               aria-label="Join waitlist"
               disabled={isSubmitting}
-              className="inline-flex h-[58px] w-[58px] items-center justify-center rounded-full border border-white/35 bg-[rgba(49,49,53,0.82)] p-0 text-white shadow-[0_10px_18px_rgba(0,0,0,0.30)] transition hover:-translate-y-px hover:bg-[rgba(61,61,67,0.92)] hover:shadow-[0_12px_22px_rgba(0,0,0,0.36)] max-[460px]:w-full"
+              className="inline-flex h-[56px] w-full items-center justify-center rounded-full border border-white/35 bg-[rgba(49,49,53,0.82)] p-0 text-white shadow-[0_10px_18px_rgba(0,0,0,0.30)] transition hover:-translate-y-px hover:bg-[rgba(61,61,67,0.92)] hover:shadow-[0_12px_22px_rgba(0,0,0,0.36)] sm:h-[58px] sm:w-[58px]"
             >
               <svg
                 className="h-[21px] w-[21px]"
@@ -127,7 +127,7 @@ function LandingPage() {
           </p>
         </main>
 
-        <footer className="flex items-end justify-center gap-3 pb-1">
+        <footer className="flex items-end justify-center gap-3 pb-1 pt-6">
           <a
             className="inline-flex h-[22px] w-[22px] items-center justify-center text-white/90 transition hover:-translate-y-px hover:text-white"
             href="https://www.instagram.com/realcitadel.store/"
