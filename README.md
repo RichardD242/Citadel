@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="logos/citadel-white-hzlgo-removebg-preview.png" alt="Citadel Logo" width="320" />
+  <img src="public/logos/citadel-white-hzlgo-removebg-preview.png" alt="Citadel Logo" width="320" />
 </p>
 
 <h1 align="center">CITADEL</h1>
